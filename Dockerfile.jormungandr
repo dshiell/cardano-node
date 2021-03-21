@@ -1,0 +1,28 @@
+FROM alpine:3.13
+
+JORMUNGANDR_VERSION="0.9.3"
+
+RUN apk update && \
+    apk add --no-cache \
+    git \
+    curl \
+    build-base \
+    protoc \
+    libgcc
+
+# install latest rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+ENV PATH=~/.cargo/env:${PATH}
+
+WORKDIR /src
+
+# build jormungandr
+RUN wget https://github.com/input-output-hk/jormungandr/archive/refs/tags/v${JORMUNGANDR_VERSION}.tar.gz \
+    tar xf v${JORMUNGANDR_VERSION}.tar.gz \
+    cd jormungandr-${JORMUNGANDR_VERSION} \
+    cargo build --release
+
+
+
+
