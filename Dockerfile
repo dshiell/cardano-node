@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     git \
     jq \
     libncursesw5 \
-    llvm \
+    llvm-9 \
     libnuma-dev
 
 # potentially install llvm-9
@@ -56,7 +56,7 @@ RUN git clone https://github.com/input-output-hk/cardano-node.git \
     && git checkout ${CARDANO_VERSION} \
     && /root/.cabal/bin/cabal configure --with-compiler=ghc-${GHC_VERSION} \
     && echo -e "package cardano-crypto-praos\n  flags: -external-libsodium-vrf" > cabal.project.local \
-    && /root/.cabal/gin/cabal build all \
+    && /root/.cabal/bin/cabal build all \
     && mkdir -p ~/.local/bin \
     && cp -p ~/cardano-node/dist-newstyle/build/aarch64-linux/ghc-${GHC_VERSION}/cardano-node-${CARDANO_VERSION}/x/cardano-node/build/cardano-node/cardano-node ~/.local/bin/ \
     && cp -p ~/cardano-node/dist-newstyle/build/aarch64-linux/ghc-${GHC_VERSION}/cardano-cli-${CARDANO_VERSION}/x/cardano-cli/build/cardano-cli/cardano-cli ~/.local/bin/ \
