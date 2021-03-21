@@ -11,7 +11,10 @@ RUN apk update && \
     libgcc
 
 # install latest rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh && \
+    chmod +x rustup.sh && \
+    ./rustup.sh -y && \
+    rm rustup.sh
 
 ENV PATH=~/.cargo/env:${PATH}
 
