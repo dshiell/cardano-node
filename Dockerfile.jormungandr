@@ -25,8 +25,7 @@ RUN git clone --depth 1 --branch ${JORMUNGANDR_VERSION} https://github.com/input
     cd jormungandr && \
     git submodule update --init && \
     mkdir .cargo && \
-    echo "[profile.release]" >> .cargo/config && \
-    echo "lto = true" >> .cargo/config && \
+    echo -e "[profile.release]\nlto = true" > .cargo/config && \
     cargo build --release
 
 FROM alpine:3.13

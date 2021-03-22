@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 
 ARG CABAL_VERSION=3.4.0.0
 ARG GHC_VERSION=8.10.2
-ARG CARDANO_VERSION=1.26.0
+ARG CARDANO_VERSION=1.25.1
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     haskell-platform \
     build-essential \
     libsodium-dev \
-    build-essential \
     pkg-config \
     libffi-dev \
     libgmp-dev \
@@ -29,9 +28,7 @@ RUN apt-get update && apt-get install -y \
     llvm-9 \
     libnuma-dev
 
-# potentially install llvm-9
-
-ENV PATH="~/.local/bin:${PATH}"
+ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /src
  
@@ -54,9 +51,10 @@ RUN git clone https://github.com/input-output-hk/cardano-node.git \
     && cd cardano-node \
     && git fetch --all --recurse-submodules --tags \
     && git checkout ${CARDANO_VERSION} \
-    && /root/.cabal/bin/cabal configure --with-compiler=ghc-${GHC_VERSION} \
-    && echo -e "package cardano-crypto-praos\n  flags: -external-libsodium-vrf" > cabal.project.local \
-    && /root/.cabal/bin/cabal build all \
+    && cabal configure --with-compiler=ghc-${GHC_VERSION} \
+    && echo -e "package cardano-crypto-praos\n  flags: -external-libsodium-vrf" > cabal.project.local
+    
+RUN cabal build all \
     && mkdir -p ~/.local/bin \
     && cp -p ~/cardano-node/dist-newstyle/build/aarch64-linux/ghc-${GHC_VERSION}/cardano-node-${CARDANO_VERSION}/x/cardano-node/build/cardano-node/cardano-node ~/.local/bin/ \
     && cp -p ~/cardano-node/dist-newstyle/build/aarch64-linux/ghc-${GHC_VERSION}/cardano-cli-${CARDANO_VERSION}/x/cardano-cli/build/cardano-cli/cardano-cli ~/.local/bin/ \
