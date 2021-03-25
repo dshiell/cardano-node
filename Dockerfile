@@ -1,9 +1,9 @@
 
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as builder
 
 ARG CABAL_VERSION=3.4.0.0
 ARG GHC_VERSION=8.10.2
-ARG CARDANO_VERSION=1.25.1
+ARG CARDANO_VERSION=1.26.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     haskell-platform \
     build-essential \
-    libsodium-dev \
     pkg-config \
     libffi-dev \
     libgmp-dev \
@@ -26,12 +25,26 @@ RUN apt-get update && apt-get install -y \
     jq \
     libncursesw5 \
     llvm-9 \
-    libnuma-dev
+    libnuma-dev \
+    libtool \
+    upx
 
-ENV PATH="/root/.local/bin:${PATH}"
+ENV PATH="/root/.cabal/bin:/root/.local/bin:${PATH}"
 
 WORKDIR /src
- 
+
+# install libsodium
+RUN git clone https://github.com/input-output-hk/libsodium && \
+    cd libsodium && \
+    git checkout 66f017f1 && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install
+
+ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}" \
+    PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}"
+
 # download cabal
 RUN wget http://hackage.haskell.org/package/cabal-install-${CABAL_VERSION}/cabal-install-${CABAL_VERSION}.tar.gz \
     && tar -xf cabal-install-${CABAL_VERSION}.tar.gz \
@@ -46,18 +59,23 @@ RUN wget -q http://downloads.haskell.org/~ghc/${GHC_VERSION}/ghc-${GHC_VERSION}-
     && ./configure \
     && make install
     
-# build cardano-node
+# fetch and configure cardano-node
 RUN git clone https://github.com/input-output-hk/cardano-node.git \
     && cd cardano-node \
     && git fetch --all --recurse-submodules --tags \
     && git checkout ${CARDANO_VERSION} \
     && cabal configure --with-compiler=ghc-${GHC_VERSION} \
     && echo -e "package cardano-crypto-praos\n  flags: -external-libsodium-vrf" > cabal.project.local
-    
-RUN cabal build all \
-    && mkdir -p ~/.local/bin \
-    && cp -p ~/cardano-node/dist-newstyle/build/aarch64-linux/ghc-${GHC_VERSION}/cardano-node-${CARDANO_VERSION}/x/cardano-node/build/cardano-node/cardano-node ~/.local/bin/ \
-    && cp -p ~/cardano-node/dist-newstyle/build/aarch64-linux/ghc-${GHC_VERSION}/cardano-cli-${CARDANO_VERSION}/x/cardano-cli/build/cardano-cli/cardano-cli ~/.local/bin/ \
-    && cardano-cli --version
-    
-    
+
+# build/install cardano
+WORKDIR /src/cardano-node
+RUN mkdir -p ~/.local/bin \
+    && cabal install -j --installdir ~/.local/bin cardano-cli cardano-node \
+
+# compress binaries
+RUN upx --best -o ~/cardano-node $(readlink -f ~/.local/bin/cardano-node)
+RUN upx --best -o ~/cardano-cli $(readlink -f ~/.local/bin/cardano-cli)
+
+RUN cardano-cli --version
+
+CMD ["/bin/bash"]
