@@ -70,7 +70,7 @@ RUN git clone https://github.com/input-output-hk/cardano-node.git \
 # build/install cardano
 WORKDIR /src/cardano-node
 RUN mkdir -p ~/.local/bin \
-    && cabal install -j --installdir ~/.local/bin cardano-cli cardano-node \
+    && cabal install -j --installdir ~/.local/bin cardano-cli cardano-node
 
 # compress binaries
 RUN upx --best -o ~/cardano-node $(readlink -f ~/.local/bin/cardano-node)
