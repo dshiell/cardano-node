@@ -34,17 +34,12 @@ spec:
             readOnly: true
           ports:
           - containerPort: 3001
-	  securityContext:
+          securityContext:
             allowPrivilegeEscalation: false
       volumes:
       - name: data
         persistentVolumeClaim:
           claimName: local-path-2
       - name: config
-        configMap:
-	  name: configs
-	  items:
-	  - key: mainnet-config
-	    path: mainnet-config.json
-	  - key: mainnet-topology
-	    path: mainnet-topology.json
+        emptyDir: {}
+

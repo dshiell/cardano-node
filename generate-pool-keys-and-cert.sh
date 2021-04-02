@@ -9,7 +9,8 @@ gid=$(id -g ${USER})
 
 
 runCliCmd() {
-    docker run --user "${uid}:${gid}" -v /etc/passwd:/etc/passwd -v $(pwd):$(pwd) -w $(pwd) "dshiell15/cardano-cli:${CLI_VERSION}" "$@"
+# --user "${uid}:${gid}" -v /etc/passwd:/etc/passwd
+    docker run -v $(pwd):$(pwd) -w $(pwd) "dshiell15/cardano-cli:${CLI_VERSION}" "$@"
 }
 
 generateColdKeys() {
@@ -47,17 +48,17 @@ generateOperationalCertificate() {
 
 setupCardanoConfigs() {
     if [ -n ${TESTMODE} ]; then
-	curl -sLo testnet-config.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/testnet-config.json
-	curl -sLo testnet-byron-genesis.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/testnet-byron-genesis.json
-	curl -sLo testnet-shelley-genesis.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/testnet-shelley-genesis.json
-	curl -sLo testnet-topology.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/testnet-topology.json
-	kubectl -n cardano create configmap configs --from-file=testnet-topology=./testnet-topology.json  --from-file=testnet-config=./testnet-config.json
+	kubectl -n cardano create configmap configs \
+	    --from-file=testnet-topology=./testnet-topology.json \
+	    --from-file=testnet-config=./testnet-config.json \
+	    --from-file=testnet-byron-genesis=./testnet-byron-genesis.json \
+	    --from-file=testnet-shelley-genesis=./testnet-shelley-genesis.json
     else
-	curl -sLo mainnet-config.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/mainnet-config.json
-	curl -sLo mainnet-byron-genesis.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/mainnet-byron-genesis.json
-	curl -sLo mainnet-shelley-genesis.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/mainnet-shelley-genesis.json
-	curl -sLo mainnet-topology.json https://hydra.iohk.io/job/Cardano/cardano-node/cardano-deployment/latest-finished/download/1/mainnet-topology.json
-	kubectl -n cardano create configmap configs --from-file=mainnet-topology=./mainnet-topology.json  --from-file=mainnet-config=./mainnet-config.json
+	kubectl -n cardano create configmap configs \
+	    --from-file=mainnet-topology=./mainnet-topology.json \
+	    --from-file=mainnet-config=./mainnet-config.json \
+	    --from-file=mainnet-byron-genesis=./mainnet-byron-genesis.json \
+	    --from-file=mainnet-shelley-genesis=./mainnet-shelley-genesis.json
     fi
 }
 
