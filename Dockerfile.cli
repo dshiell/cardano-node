@@ -17,4 +17,6 @@ COPY --from=cardano-node-base /lib/aarch64-linux-gnu/libgcrypt.so.20 /lib/aarch6
 COPY --from=cardano-node-base /lib/aarch64-linux-gnu/libgpg-error.so.0 /lib/aarch64-linux-gnu/libgpg-error.so.0
 COPY --from=cardano-node-base /root/.local/bin/cardano-cli /usr/local/bin/cardano-cli
 
+USER 1001
+
 ENTRYPOINT ["/usr/local/bin/cardano-cli"]
