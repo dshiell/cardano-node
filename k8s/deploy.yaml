@@ -36,10 +36,21 @@ spec:
           - containerPort: 3001
           securityContext:
             allowPrivilegeEscalation: false
+      affinity:
+        podAntiAffinity:
+           requiredDuringSchedulingIgnoredDuringExecution:
+             - labelSelector:
+                 matchExpressions:
+                   - key: "app"
+                     operator: In
+                     values:
+                     - producer
+               topologyKey: "kubernetes.io/hostname"
       volumes:
       - name: data
         persistentVolumeClaim:
           claimName: local-path-2
       - name: config
-        emptyDir: {}
+        configMap:
+          name: configs
 

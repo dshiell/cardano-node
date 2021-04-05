@@ -47,20 +47,17 @@ generateOperationalCertificate() {
 }
 
 setupCardanoConfigs() {
-    if [ -n ${TESTMODE} ]; then
-	kubectl -n cardano create configmap configs \
-	    --from-file=testnet-topology=./testnet-topology.json \
-	    --from-file=testnet-config=./testnet-config.json \
-	    --from-file=testnet-byron-genesis=./testnet-byron-genesis.json \
-	    --from-file=testnet-shelley-genesis=./testnet-shelley-genesis.json
-    else
-	kubectl -n cardano create configmap configs \
-	    --from-file=mainnet-topology=./mainnet-topology.json \
-	    --from-file=mainnet-config=./mainnet-config.json \
-	    --from-file=mainnet-byron-genesis=./mainnet-byron-genesis.json \
-	    --from-file=mainnet-shelley-genesis=./mainnet-shelley-genesis.json
-    fi
+    kubectl -n cardano create configmap configs \
+	--from-file=mainnet-topology.json=./configs/mainnet-topology.json \
+	--from-file=mainnet-config.json=./configs/mainnet-config.json \
+	--from-file=mainnet-byron-genesis.json=./configs/mainnet-byron-genesis.json \
+	--from-file=mainnet-shelley-genesis.json=./configs/mainnet-shelley-genesis.json \
+	--from-file=testnet-topology.json=./configs/testnet-topology.json \
+	--from-file=testnet-config.json=./configs/testnet-config.json \
+	--from-file=testnet-byron-genesis.json=./configs/testnet-byron-genesis.json \
+	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json
 }
 
-generateColdKeys
+setupCardanoConfigs
+#generateColdKeys
 #generateOperationalCertificate
