@@ -105,6 +105,4 @@ EXPOSE 3000
 EXPOSE 3001
 EXPOSE 3002
 
-ENV CARDANO_NODE_SOCKET_PATH=/data/db/node.socket
-
 ENTRYPOINT ["/usr/local/bin/cardano-node"]
