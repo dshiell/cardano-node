@@ -101,8 +101,6 @@ COPY --from=builder /root/cardano-node /usr/local/bin/cardano-node
 COPY --from=builder /root/cardano-cli /usr/local/bin/cardano-cli
 
 USER 1001
-EXPOSE 3000
 EXPOSE 3001
-EXPOSE 3002
 
 ENTRYPOINT ["/usr/local/bin/cardano-node"]
