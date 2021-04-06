@@ -13,6 +13,10 @@ runCliCmd() {
     docker run -v $(pwd):$(pwd) -w $(pwd) "dshiell15/cardano-cli:${CLI_VERSION}" "$@"
 }
 
+runCliCmdK8s() {
+    kubectl -n cardano exec -t deploy/relay -- /usr/local/bin/cardano-cli "$@"
+}
+
 generateColdKeys() {
     runCliCmd node key-gen \
 	      --cold-verification-key-file cold.vkey \
@@ -34,7 +38,7 @@ generateKesPair() {
 
 generateOperationalCertificate() {
     local slotsPerKESPeriod=$(curl -sLo - https://hydra.iohk.io/build/5822084/download/1/mainnet-shelley-genesis.json | jq .slotsPerKESPeriod)
-    local slotNo=$(runCliCmd query tip --mainnet | jq .slotNo)
+    local slotNo=$(runCliCmdK8s query tip --mainnet | jq .slotNo)
     local keyPeriod=$(expr "${slotNo}" / "${slotsPerKESPeriod}")
 
     echo $keyPeriod
@@ -47,8 +51,10 @@ generateOperationalCertificate() {
 }
 
 setupCardanoConfigs() {
+    kubectl -n cardano delete cm/configs
     kubectl -n cardano create configmap configs \
 	--from-file=mainnet-topology.json=./configs/mainnet-topology.json \
+	--from-file=mainnet-relay-topology.json=./configs/mainnet-relay-topology.json \
 	--from-file=mainnet-config.json=./configs/mainnet-config.json \
 	--from-file=mainnet-byron-genesis.json=./configs/mainnet-byron-genesis.json \
 	--from-file=mainnet-shelley-genesis.json=./configs/mainnet-shelley-genesis.json \
@@ -58,6 +64,6 @@ setupCardanoConfigs() {
 	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json
 }
 
-setupCardanoConfigs
+#setupCardanoConfigs
 #generateColdKeys
-#generateOperationalCertificate
+generateOperationalCertificate

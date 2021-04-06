@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: producer-network-policy
+  namespace: cardano
+spec:
+  podSelector:
+    matchLabels:
+      app: producer 
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cardano
+      podSelector:
+        matchLabels:
+          app: relay
+    ports:
+    - protocol: TCP
+      port: 3001

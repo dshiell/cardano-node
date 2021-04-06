@@ -24,11 +24,11 @@ spec:
         runAsUser: 1001
       containers:
         - name: relay
-          image: dshiell15/cardano-node:1.26.0
+          image: dshiell15/cardano-node:1.25.1
           env:
           - name: CARDANO_NODE_SOCKET_PATH
-            value: "/data/db/node.socket"
-          args: ["run", "--topology", "/config/mainnet-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--port", "3001", "--config", "/config/mainnet-config.json"]   
+            value: "/data/db/socket"
+          args: ["run", "--topology", "/config/mainnet-relay-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json"]   
           volumeMounts:
           - name: data
             mountPath: /data
