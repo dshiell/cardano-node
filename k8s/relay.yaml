@@ -1,12 +1,13 @@
-kind: Deployment
+kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: relay
   namespace: cardano
   labels:
-    app: relay
+    role: relay
 spec:
-  replicas: 1
+  serviceName: relay
+  replicas: 4
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -14,12 +15,13 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: relay
+      role: relay
   template:
     metadata:
       labels:
-        app: relay
+        role: relay
     spec:
+      restartPolicy: Always
       securityContext:
         runAsUser: 1001
       containers:
@@ -27,11 +29,13 @@ spec:
           image: dshiell15/cardano-node:1.25.1
           env:
           - name: CARDANO_NODE_SOCKET_PATH
-            value: "/data/db/socket"
+            value: "/ipc/socket"
           args: ["run", "--topology", "/config/mainnet-relay-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json"]   
           volumeMounts:
           - name: data
             mountPath: /data
+	  - name: ipc
+            mountPath: /ipc
           - name: config
             mountPath: /config
             readOnly: true
@@ -50,10 +54,18 @@ spec:
                      - producer
                topologyKey: "kubernetes.io/hostname"
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: local-path-2
+      - name: ipc
+        emptyDir:
+          medium: MemorypersistentVolumeClaim:
       - name: config
         configMap:
           name: configs
-
+    volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+	accessModes: [ "ReadWriteOnce" ]
+	storageClassName: "longhorn"
+	resources:
+	  requests:
+	    storage: 50Gi

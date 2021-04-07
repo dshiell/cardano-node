@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: producer 
+      role: producer 
   policyTypes:
   - Ingress
   ingress:
@@ -16,7 +16,7 @@ spec:
           name: cardano
       podSelector:
         matchLabels:
-          app: relay
+          role: relay
     ports:
     - protocol: TCP
       port: 3001

@@ -64,6 +64,6 @@ setupCardanoConfigs() {
 	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json
 }
 
-#setupCardanoConfigs
+setupCardanoConfigs
 #generateColdKeys
-generateOperationalCertificate
+#generateOperationalCertificate
