@@ -2,7 +2,7 @@ FROM ubuntu:20.04 as builder
 
 ARG CABAL_VERSION=3.4.0.0
 ARG GHC_VERSION=8.10.2
-ARG CARDANO_VERSION=1.26.0
+ARG CARDANO_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -102,5 +102,7 @@ COPY --from=builder /root/cardano-cli /usr/local/bin/cardano-cli
 
 USER 1001
 EXPOSE 3001
+
+ENV CARDANO_NODE_SOCKET_PATH=/ipc/socket
 
 ENTRYPOINT ["/usr/local/bin/cardano-node"]
