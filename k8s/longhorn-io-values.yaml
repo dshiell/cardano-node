@@ -1,10 +1,14 @@
 csi:
   kubeletRootDir: /var/lib/kubelet
 
+persistence:
+  defaultClassReplicaCount: 2
+
 defaultSettings:
   replicaSoftAntiAffinity: true
   replicaZoneSoftAntiAffinity: true
   createDefaultDiskLabeledNodes: true
+  defaultDataPath: /data
   defaultReplicaCount: 2
   defaultLonghornStaticStorageClass: longhorn-static-storageclass
-  guaranteedEngineCPU: 0.10
+  guaranteedEngineCPU: 0.15

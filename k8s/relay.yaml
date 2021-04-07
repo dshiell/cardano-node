@@ -8,11 +8,6 @@ metadata:
 spec:
   serviceName: relay
   replicas: 4
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1
   selector:
     matchLabels:
       role: relay
@@ -34,7 +29,7 @@ spec:
           volumeMounts:
           - name: data
             mountPath: /data
-	  - name: ipc
+          - name: ipc
             mountPath: /ipc
           - name: config
             mountPath: /config
@@ -48,7 +43,7 @@ spec:
            requiredDuringSchedulingIgnoredDuringExecution:
              - labelSelector:
                  matchExpressions:
-                   - key: "app"
+                   - key: "role"
                      operator: In
                      values:
                      - producer
@@ -56,16 +51,16 @@ spec:
       volumes:
       - name: ipc
         emptyDir:
-          medium: MemorypersistentVolumeClaim:
+          medium: Memory
       - name: config
         configMap:
           name: configs
-    volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-	accessModes: [ "ReadWriteOnce" ]
-	storageClassName: "longhorn"
-	resources:
-	  requests:
-	    storage: 50Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "longhorn"
+      resources:
+        requests:
+          storage: 50Gi
