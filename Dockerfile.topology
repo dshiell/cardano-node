@@ -1,7 +1,19 @@
 FROM ubuntu:20.04
 
+RUN apt-get update && apt-get install -y \
+	curl \	
+	jq
+
 RUN curl -s -o topologyUpdater.sh https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/topologyUpdater.sh \
     && curl -s -o env https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/env \
     && chmod 750 topologyUpdater.sh
+
+COPY --from=dshiell15/cardano-node:1.26.1 /lib/aarch64-linux-gnu/libsodium.so.23 /lib/aarch64-linux-gnu/libsodium.so.23
+COPY --from=dshiell15/cardano-node:1.26.1 /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
+
+ENV CCLI=/usr/local/bin/cardano-cli \
+    SOCKET=/ipc/socket \
+        
+ENV CARDANO_NODE_SOCKET_PATH=/ipc/socket
 
 CMD "/bin/bash"
