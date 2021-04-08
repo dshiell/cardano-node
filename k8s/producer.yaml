@@ -1,32 +1,32 @@
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
-  name: relay
+  name: producer
   namespace: cardano
   labels:
-    role: relay
+    role: producer
 spec:
-  serviceName: relay
-  replicas: 4
+  serviceName: producer
+  replicas: 1
   selector:
     matchLabels:
-      role: relay
+      role: producer
   template:
     metadata:
       labels:
-        role: relay
+        role: producer
     spec:
       restartPolicy: Always
       securityContext:
         runAsUser: 1001
         fsGroup: 1001
       containers:
-        - name: relay
+        - name: producer
           image: dshiell15/cardano-node:1.26.1
           env:
           - name: CARDANO_NODE_SOCKET_PATH
             value: "/ipc/socket"
-          args: ["run", "--topology", "/config/mainnet-relay-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json"]   
+          args: ["run", "--topology", "/config/mainnet-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json", "--shelley-kes-key", "kes.skey", "--shelley-vrf-key", "vrf.skey", "--shelley-operational-certificate", "node.cert"]   
           volumeMounts:
           - name: data
             mountPath: /data
@@ -47,7 +47,7 @@ spec:
                    - key: "role"
                      operator: In
                      values:
-                     - producer
+                     - relay
                topologyKey: "kubernetes.io/hostname"
       volumes:
       - name: ipc

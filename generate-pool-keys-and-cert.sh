@@ -3,7 +3,7 @@
 
 set -e
 
-CLI_VERSION='1.26.0'
+CLI_VERSION='1.26.1'
 uid=$(id -u ${USER})
 gid=$(id -g ${USER})
 
@@ -51,7 +51,9 @@ generateOperationalCertificate() {
 }
 
 setupCardanoConfigs() {
+    set +e
     kubectl -n cardano delete cm/configs
+    set -e
     kubectl -n cardano create configmap configs \
 	--from-file=mainnet-topology.json=./configs/mainnet-topology.json \
 	--from-file=mainnet-relay-topology.json=./configs/mainnet-relay-topology.json \
@@ -64,6 +66,8 @@ setupCardanoConfigs() {
 	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json
 }
 
-#setupCardanoConfigs
-#generateColdKeys
+setupCardanoConfigs
+generateColdKeys
+generateVrfKeyPair
+generateKesPair
 generateOperationalCertificate
