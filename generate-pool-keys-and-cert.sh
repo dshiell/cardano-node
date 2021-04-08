@@ -7,39 +7,27 @@ CLI_VERSION='1.26.1'
 uid=$(id -u ${USER})
 gid=$(id -g ${USER})
 
-
-runCliCmd() {
-# --user "${uid}:${gid}" -v /etc/passwd:/etc/passwd
-    docker run -v $(pwd):$(pwd) -w $(pwd) "dshiell15/cardano-cli:${CLI_VERSION}" "$@"
-}
-
-runCliCmdK8s() {
+runCliCmdRelay() {
     kubectl -n cardano exec -t statefulset/relay -- /usr/local/bin/cardano-cli "$@"
 }
 
-generateColdKeys() {
-    runCliCmd node key-gen \
-	      --cold-verification-key-file cold.vkey \
-	      --cold-signing-key-file cold.skey \
-	      --operational-certificate-issue-counter-file cold.counter
-}
-
-generateVrfKeyPair() {
-    runCliCmd node key-gen-VRF \
-	      --verification-key-file vrf.vkey \
-	      --signing-key-file vrf.skey
-}
-
-generateKesPair() {
-    runCliCmd node key-gen-KES \
-	      --verification-key-file kes.vkey \
-	      --signing-key-file kes.skey
+# generate stake pool keys
+generateKeys() {
+    kubectl apply -f k8s/generate-keys-job.yaml
+#    sleep 3
+    local pod=$(kubectl -n cardano get pod -l job-name=generate-pool-keys --output=jsonpath='{.items[*].metadata.name}')
+    echo "Waiting for job to start..."
+    kubectl -n cardano wait --timeout=30s --for=condition=Ready "pod/${pod}"
+    mkdir -p keys
+    kubectl cp "cardano/${pod}:/job" keys
+    echo "Successfully created cold keys, vrf keys, and key keys. See ./keys directory."
+    kubectl delete -f k8s/generate-keys-job.yaml
 }
 
 generateOperationalCertificate() {
     local slotsPerKESPeriod=$(curl -sLo - https://hydra.iohk.io/build/5822084/download/1/mainnet-shelley-genesis.json | jq .slotsPerKESPeriod)
-    local slotNo=$(runCliCmdK8s query tip --mainnet | jq .slotNo)
-    local keyPeriod=$(expr "${slotNo}" / "${slotsPerKESPeriod}")
+    local slot=$(runCliCmdRelay query tip --mainnet | jq .slot)
+    local keyPeriod=$(expr "${slot}" / "${slotsPerKESPeriod}")
 
     echo $keyPeriod
     #runCliCmd node issue-op-cert \
@@ -67,7 +55,7 @@ setupCardanoConfigs() {
 }
 
 setupCardanoConfigs
-generateColdKeys
-generateVrfKeyPair
-generateKesPair
+generateKeys
+#generateVrfKeyPair
+#generateKesPair
 generateOperationalCertificate
