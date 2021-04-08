@@ -14,7 +14,6 @@ runCliCmdRelay() {
 # generate stake pool keys
 generateKeys() {
     kubectl apply -f k8s/generate-keys-job.yaml
-#    sleep 3
     local pod=$(kubectl -n cardano get pod -l job-name=generate-pool-keys --output=jsonpath='{.items[*].metadata.name}')
     echo "Waiting for job to start..."
     kubectl -n cardano wait --timeout=30s --for=condition=Ready "pod/${pod}"
@@ -56,6 +55,4 @@ setupCardanoConfigs() {
 
 setupCardanoConfigs
 generateKeys
-#generateVrfKeyPair
-#generateKesPair
 generateOperationalCertificate
