@@ -14,7 +14,7 @@ runCliCmd() {
 }
 
 runCliCmdK8s() {
-    kubectl -n cardano exec -t deploy/relay -- /usr/local/bin/cardano-cli "$@"
+    kubectl -n cardano exec -t statefulset/relay -- /usr/local/bin/cardano-cli "$@"
 }
 
 generateColdKeys() {
@@ -64,6 +64,6 @@ setupCardanoConfigs() {
 	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json
 }
 
-setupCardanoConfigs
+#setupCardanoConfigs
 #generateColdKeys
-#generateOperationalCertificate
+generateOperationalCertificate

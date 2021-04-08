@@ -19,6 +19,7 @@ spec:
       restartPolicy: Always
       securityContext:
         runAsUser: 1001
+        fsGroup: 1001
       containers:
         - name: relay
           image: dshiell15/cardano-node:1.25.1

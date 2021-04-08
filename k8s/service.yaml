@@ -4,14 +4,13 @@ metadata:
   name: relay
   namespace: cardano
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
-    app: relay
+    role: relay
   ports:
     - protocol: TCP
       port: 3001
       targetPort: 3001
-      nodePort: 32635
 ---
 apiVersion: v1
 kind: Service
@@ -20,7 +19,7 @@ metadata:
   namespace: cardano
 spec:
   selector:
-    app: producer
+    role: producer
   ports:
     - protocol: TCP
       port: 3001
