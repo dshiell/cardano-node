@@ -21,7 +21,36 @@ spec:
         runAsUser: 1001
         fsGroup: 1001
       containers:
-        - name: relay
+        - name: topology-updater
+          image: dshiell15/cardano-topology-updater
+          env:
+          - name: CNODE_HOSTNAME
+            value: "rpi-cardano-pool.dyndns.org"
+          - name: CNODE_PORT
+            value: 3001
+          - name: EKG_TIMEOUT
+            value: 3
+          - name: EKG_HOST
+            value: 127.0.0.1
+          - name: EKG_PORT
+            value: 12788
+          - name: GENESIS_JSON
+            value: "/config/mainnet-shelley-genesis.json"
+          - name: LOG_DIR
+            value: "/logs"
+          - name: MAX_PEERS
+            value: 20
+          - CUSTOM_PEERS
+            value: "producer-0.cardano.svc.cluster.local:3001:1"
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: config
+            mountPath: /config
+            readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+       - name: relay
           image: dshiell15/cardano-node:1.26.1
           env:
           - name: CARDANO_NODE_SOCKET_PATH
