@@ -12,37 +12,37 @@ spec:
     spec:
       restartPolicy: Never
       volumes:
-        - name: job-files
+        - name: keys
           emptyDir: {}
       initContainers:
       - name: cold-keys
         image: dshiell15/cardano-node:1.26.1
         volumeMounts:
-          - name: job-files
-            mountPath: /job
-        workingDir: /job
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "node", "key-gen", "--cold-verification-key-file", "cold.vkey", "--cold-signing-key-file", "cold.skey", "--operational-certificate-issue-counter-file", "cold.counter"]
       - name: vrf-keys
         image: dshiell15/cardano-node:1.26.1
         volumeMounts:
-          - name: job-files
-            mountPath: /job
-        workingDir: /job
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "node", "key-gen-VRF", "--verification-key-file", "vrf.vkey", "--signing-key-file", "vrf.skey"]
       - name: kes-keys
         image: dshiell15/cardano-node:1.26.1
         volumeMounts:
-          - name: job-files
-            mountPath: /job
-        workingDir: /job
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "node", "key-gen-KES", "--verification-key-file", "key.vkey", "--signing-key-file", "kes.skey"]
       containers:
       - name: export-keys
         image: alpine
         volumeMounts:
-          - name: job-files
-            mountPath: /job
-        workingDir: /job
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
         command: [/bin/sh, -c]
         args:
           - |

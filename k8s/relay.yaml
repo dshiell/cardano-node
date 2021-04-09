@@ -37,6 +37,7 @@ spec:
             readOnly: true
           ports:
           - containerPort: 3001
+          - containerPort: 12798
           securityContext:
             allowPrivilegeEscalation: false
       affinity:
