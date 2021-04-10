@@ -1,5 +1,8 @@
 #!/bin/sh
 set -euxo pipefail
 
-echo "* * * * * /scripts/sayhi.sh" > /var/spool/cron/crontabs/root
-crond -f
+echo "* * * * * /scripts/topologyUpdater.sh" > /etc/cron.d/topology-updater
+
+# run once at startup to test
+/scripts/topologyUpdater.sh
+cron -f
