@@ -7,7 +7,7 @@ metadata:
     role: relay
 spec:
   serviceName: relay
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       role: relay
