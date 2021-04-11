@@ -80,23 +80,13 @@ RUN cardano-cli --version
 CMD ["/bin/bash"]
 
 # build minimal image
-FROM scratch
+FROM ubuntu:20.04
 
-COPY --from=builder /lib/ld-linux-aarch64.so.1 /lib/ld-linux-aarch64.so.1
-COPY --from=builder /lib/aarch64-linux-gnu/libz.so.1 /lib/aarch64-linux-gnu/libz.so.1
+RUN apt-get update && apt-get install -y \
+    netbase
+
 COPY --from=builder /usr/local/lib/libsodium.so.23 /lib/aarch64-linux-gnu/libsodium.so.23
-COPY --from=builder /lib/aarch64-linux-gnu/libpthread.so.0 /lib/aarch64-linux-gnu/libpthread.so.0
-COPY --from=builder /lib/aarch64-linux-gnu/libsystemd.so.0 /lib/aarch64-linux-gnu/libsystemd.so.0
-COPY --from=builder /lib/aarch64-linux-gnu/librt.so.1 /lib/aarch64-linux-gnu/librt.so.1
-COPY --from=builder /lib/aarch64-linux-gnu/libutil.so.1 /lib/aarch64-linux-gnu/libutil.so.1
-COPY --from=builder /lib/aarch64-linux-gnu/libdl.so.2 /lib/aarch64-linux-gnu/libdl.so.2
-COPY --from=builder /lib/aarch64-linux-gnu/libc.so.6 /lib/aarch64-linux-gnu/libc.so.6
-COPY --from=builder /lib/aarch64-linux-gnu/libm.so.6 /lib/aarch64-linux-gnu/libm.so.6
 COPY --from=builder /lib/aarch64-linux-gnu/libnuma.so.1 /lib/aarch64-linux-gnu/libnuma.so.1
-COPY --from=builder /lib/aarch64-linux-gnu/liblzma.so.5 /lib/aarch64-linux-gnu/liblzma.so.5
-COPY --from=builder /lib/aarch64-linux-gnu/liblz4.so.1 /lib/aarch64-linux-gnu/liblz4.so.1
-COPY --from=builder /lib/aarch64-linux-gnu/libgcrypt.so.20 /lib/aarch64-linux-gnu/libgcrypt.so.20
-COPY --from=builder /lib/aarch64-linux-gnu/libgpg-error.so.0 /lib/aarch64-linux-gnu/libgpg-error.so.0
 COPY --from=builder /root/cardano-node /usr/local/bin/cardano-node
 COPY --from=builder /root/cardano-cli /usr/local/bin/cardano-cli
 
