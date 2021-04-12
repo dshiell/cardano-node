@@ -3,10 +3,6 @@
 
 set -e
 
-CLI_VERSION='1.26.1'
-uid=$(id -u ${USER})
-gid=$(id -g ${USER})
-
 runCliCmdRelay() {
     kubectl -n cardano exec -t statefulset/relay -- /usr/local/bin/cardano-cli "$@"
 }

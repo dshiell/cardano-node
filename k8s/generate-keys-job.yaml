@@ -15,6 +15,20 @@ spec:
         - name: keys
           emptyDir: {}
       initContainers:
+      - name: payment-keys
+        image: dshiell15/cardano-node:1.26.1
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+        command: ["/usr/local/bin/cardano-cli", "address", "key-gen", "--verification-key-file", "payment.vkey", "--signing-key-file", "payment.skey"]
+      - name: payment-address
+        image: dshiell15/cardano-node:1.26.1
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+        command: ["/usr/local/bin/cardano-cli", "address", "build", "--payment-verification-key-file", "payment.vkey", "--out-file", "payment.addr", "--mainnet"]
       - name: cold-keys
         image: dshiell15/cardano-node:1.26.1
         volumeMounts:
