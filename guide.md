@@ -105,3 +105,14 @@ curl -sSfL https://raw.githubusercontent.com/longhorn/longhorn/v1.0.0/scripts/en
 
 kubectl create namespace longhorn-system
 helm upgrade --install -n longhorn-system -f k8s/longhorn-io-values.yaml longhorn longhorn/longhorn
+
+Install Prometheus + Grafana
+----------------------------
+
+- kubectl create namespace monitoring
+- helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+- helm repo add stable https://charts.helm.sh/stable
+- helm update
+- helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring 
+- kubectl --namespace monitoring get pods
+
