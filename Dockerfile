@@ -1,7 +1,7 @@
 FROM ubuntu:20.04 as builder
 
 ARG CABAL_VERSION=3.4.0.0
-ARG GHC_VERSION=8.10.2
+ARG GHC_VERSION=8.10.4
 ARG CARDANO_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -90,7 +90,7 @@ COPY --from=builder /lib/aarch64-linux-gnu/libnuma.so.1 /lib/aarch64-linux-gnu/l
 COPY --from=builder /root/cardano-node /usr/local/bin/cardano-node
 COPY --from=builder /root/cardano-cli /usr/local/bin/cardano-cli
 
-USER 1001
+#USER 1001
 EXPOSE 3001
 
 ENV CARDANO_NODE_SOCKET_PATH=/ipc/socket
