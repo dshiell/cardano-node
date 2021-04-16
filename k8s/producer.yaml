@@ -5,12 +5,14 @@ metadata:
   namespace: cardano
   labels:
     role: producer
+    app: cardano-mainnet-node
 spec:
   serviceName: producer
   replicas: 1
   selector:
     matchLabels:
       role: producer
+      app: cardano-mainnet-node
   template:
     metadata:
       labels:

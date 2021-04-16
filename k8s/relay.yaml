@@ -5,16 +5,22 @@ metadata:
   namespace: cardano
   labels:
     role: relay
+    app: cardano-mainnet-node
 spec:
   serviceName: relay
   replicas: 4
   selector:
     matchLabels:
       role: relay
+      app: cardano-mainnet-node
   template:
     metadata:
       labels:
         role: relay
+        app: cardano-mainnet-node
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '12798'
     spec:
       restartPolicy: Always
       securityContext:
