@@ -1,5 +1,9 @@
 #!/usr/bin/env sh
 
+# Check the balance of your address.
+
+### IMPORTANT: Will not work until relays are fully sync'd ***
+
 runCliCmdRelay() {
     kubectl -n cardano exec -t statefulset/relay -- /usr/local/bin/cardano-cli "$@"
 }
