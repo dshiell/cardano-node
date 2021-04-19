@@ -17,7 +17,8 @@ setupCardanoConfigs() {
 	--from-file=testnet-topology.json=./configs/testnet-topology.json \
 	--from-file=testnet-config.json=./configs/testnet-config.json \
 	--from-file=testnet-byron-genesis.json=./configs/testnet-byron-genesis.json \
-	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json
+	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json \
+	--from-file=protocol-parameters.json=./configs/protocol-parameters.json
 }
 
 setupCardanoConfigs

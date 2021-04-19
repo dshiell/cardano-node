@@ -28,7 +28,7 @@ spec:
         fsGroup: 1001
       containers:
       - name: relay
-        image: dshiell15/cardano-node:1.26.1
+        image: dshiell15/cardano-node:1.26.2
         env:
         - name: CARDANO_NODE_SOCKET_PATH
           value: "/ipc/socket"

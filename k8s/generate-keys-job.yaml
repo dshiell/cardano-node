@@ -16,35 +16,49 @@ spec:
           emptyDir: {}
       initContainers:
       - name: payment-keys
-        image: dshiell15/cardano-node:1.26.1
+        image: dshiell15/cardano-node:1.26.2
         volumeMounts:
           - name: keys
             mountPath: /keys
         workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "address", "key-gen", "--verification-key-file", "payment.vkey", "--signing-key-file", "payment.skey"]
       - name: payment-address
-        image: dshiell15/cardano-node:1.26.1
+        image: dshiell15/cardano-node:1.26.2
         volumeMounts:
           - name: keys
             mountPath: /keys
         workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "address", "build", "--payment-verification-key-file", "payment.vkey", "--out-file", "payment.addr", "--mainnet"]
+      - name: stake-keys
+        image: dshiell15/cardano-node:1.26.2
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+        command: ["/usr/local/bin/cardano-cli", "stake-address", "key-gen", "--verification-key-file", "stake.vkey", "--signing-key-file", "stake.skey"]
+      - name: stake-address
+        image: dshiell15/cardano-node:1.26.2
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+        command: ["/usr/local/bin/cardano-cli", "stake-address", "build", "--stake-verification-key-file", "stake.vkey", "--out-file", "stake.addr", "--mainnet"]
       - name: cold-keys
-        image: dshiell15/cardano-node:1.26.1
+        image: dshiell15/cardano-node:1.26.2
         volumeMounts:
           - name: keys
             mountPath: /keys
         workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "node", "key-gen", "--cold-verification-key-file", "cold.vkey", "--cold-signing-key-file", "cold.skey", "--operational-certificate-issue-counter-file", "cold.counter"]
       - name: vrf-keys
-        image: dshiell15/cardano-node:1.26.1
+        image: dshiell15/cardano-node:1.26.2
         volumeMounts:
           - name: keys
             mountPath: /keys
         workingDir: /keys
         command: ["/usr/local/bin/cardano-cli", "node", "key-gen-VRF", "--verification-key-file", "vrf.vkey", "--signing-key-file", "vrf.skey"]
       - name: kes-keys
-        image: dshiell15/cardano-node:1.26.1
+        image: dshiell15/cardano-node:1.26.2
         volumeMounts:
           - name: keys
             mountPath: /keys
