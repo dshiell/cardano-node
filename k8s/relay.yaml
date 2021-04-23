@@ -8,7 +8,7 @@ metadata:
     app: cardano-mainnet-node
 spec:
   serviceName: relay
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       role: relay
@@ -32,7 +32,22 @@ spec:
         env:
         - name: CARDANO_NODE_SOCKET_PATH
           value: "/ipc/socket"
-        args: ["run", "--topology", "/config/mainnet-relay-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json"]   
+        args: ["run", "--topology", "/config/mainnet-relay-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json"]
+	  livenessProbe:
+	    exec:
+	      command: ["cardano-cli", "query", "tip", "--mainnet"]
+	    initialDelaySeconds: 5
+	    periodSeconds: 30
+	  startupProbe:
+	    exec:
+	      command: ["cardano-cli", "query", "tip", "--mainnet"]
+	    failureThreshold: 200
+	    periodSeconds: 10
+	  readinessProbe:
+	    exec:
+	      command: ["cardano-cli", "query", "tip", "--mainnet"]
+	    failureThreshold: 200
+	    periodSeconds: 10
         volumeMounts:
         - name: data
           mountPath: /data
