@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: relay
+  name: relay-lb
   namespace: cardano
 spec:
   type: LoadBalancer
@@ -15,7 +15,34 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: relay-int
+  namespace: cardano
+spec:
+  clusterIP: None
+  selector:
+    role: relay
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: producer
+  namespace: cardano
+spec:
+  selector:
+    role: producer
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: relay-metrics
   namespace: cardano
 spec:
   selector:
