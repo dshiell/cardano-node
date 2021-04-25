@@ -17,33 +17,44 @@ spec:
     metadata:
       labels:
         role: producer
+        app: cardano-mainnet-node
     spec:
       restartPolicy: Always
       securityContext:
         runAsUser: 1001
         fsGroup: 1001
+      initContainers:
+        - name: init-permissions
+          image: dshiell15/cardano-node:1.26.2
+          command: ["/bin/sh", "-c"]
+          args: ["cp /secret/* /keys && chmod 0400 /keys/*"]
+          volumeMounts:
+          - name: secret
+            mountPath: /secret
+          - name: keys
+            mountPath: /keys
       containers:
         - name: producer
-          image: dshiell15/cardano-node:1.26.1
+          image: dshiell15/cardano-node:1.26.2
           env:
           - name: CARDANO_NODE_SOCKET_PATH
             value: "/ipc/socket"
-          args: ["run", "--topology", "/config/mainnet-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json", "--shelley-kes-key", "kes.skey", "--shelley-vrf-key", "vrf.skey", "--shelley-operational-certificate", "node.cert"]
-	  livenessProbe:
-	    exec:
-	      command: ["cardano-cli", "query", "tip", "--mainnet"]
-	    initialDelaySeconds: 5
-	    periodSeconds: 30
-	  startupProbe:
-	    exec:
-	      command: ["cardano-cli", "query", "tip", "--mainnet"]
-	    failureThreshold: 200
-	    periodSeconds: 10
-	  readinessProbe:
-	    exec:
-	      command: ["cardano-cli", "query", "tip", "--mainnet"]
-	    failureThreshold: 200
-	    periodSeconds: 10
+          args: ["run", "--topology", "/config/mainnet-topology.json", "--database-path", "/data/db", "--socket-path", $(CARDANO_NODE_SOCKET_PATH), "--host-addr", "0.0.0.0", "--port", "3001", "--config", "/config/mainnet-config.json", "--shelley-kes-key", "/keys/kes.skey", "--shelley-vrf-key", "/keys/vrf.skey", "--shelley-operational-certificate", "/keys/node.cert"]
+          livenessProbe:
+            exec:
+              command: ["cardano-cli", "query", "tip", "--mainnet"]
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          startupProbe:
+            exec:
+              command: ["cardano-cli", "query", "tip", "--mainnet"]
+            failureThreshold: 200
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["cardano-cli", "query", "tip", "--mainnet"]
+            failureThreshold: 200
+            periodSeconds: 10
           volumeMounts:
           - name: data
             mountPath: /data
@@ -51,6 +62,9 @@ spec:
             mountPath: /ipc
           - name: config
             mountPath: /config
+            readOnly: true
+          - name: keys
+            mountPath: /keys
             readOnly: true
           ports:
           - containerPort: 3001
@@ -70,9 +84,15 @@ spec:
       - name: ipc
         emptyDir:
           medium: Memory
+      - name: keys
+        emptyDir:
+          medium: Memory
       - name: config
         configMap:
           name: configs
+      - name: secret
+        secret:
+          secretName: keys
   volumeClaimTemplates:
   - metadata:
       name: data

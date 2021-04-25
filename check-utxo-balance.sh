@@ -13,7 +13,7 @@ checkUTXOBalance() {
     local addr="${1}"
 
     if [ -f keys/payment.addr ]; then
-	runCliCmdRelay query utxo --address "${addr}" --mainnet
+	runCliCmd query utxo --address "${addr}" --mainnet
     else
 	echo "Please run ./generate-pool-keys-and-cert.sh to generate pool keys, address, and cert first! They keys should be kept in cold storage, keep these safe!!!" 1>&2
 	exit 1

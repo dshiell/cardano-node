@@ -8,6 +8,7 @@ runCliCmd() {
 }
 
 # generate stake pool keys and operation certificate
+# Run this before starting the block producer
 generateKeysAndOperationalCertificate() {
     local slotsPerKESPeriod=$(jq .slotsPerKESPeriod configs/mainnet-shelley-genesis.json)
     local slot=$(runCliCmd query tip --mainnet | jq .slot)
