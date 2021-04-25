@@ -11,10 +11,7 @@ spec:
   - Ingress
   ingress:
   - from:
-    - namespaceSelector:
-        matchLabels:
-          name: cardano
-      podSelector:
+    - podSelector:
         matchLabels:
           role: relay
     ports:
