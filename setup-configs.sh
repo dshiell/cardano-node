@@ -4,7 +4,7 @@
 set -e
 
 # setup configmap with required configs
-setupCardanoConfigs() {
+setupNodeConfigs() {
     set +e
     kubectl -n cardano delete cm/configs
     set -e
@@ -21,4 +21,4 @@ setupCardanoConfigs() {
 	--from-file=protocol-parameters.json=./configs/protocol-parameters.json
 }
 
-setupCardanoConfigs
+setupNodeConfigs

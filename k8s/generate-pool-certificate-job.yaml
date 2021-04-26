@@ -1,0 +1,93 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: generate-pool-registration-certificate
+  namespace: cardano
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      labels:
+        job-name: generate-pool-registration-certificate
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: keys
+          emptyDir: {}
+            medium: Memory	   
+        - name: config
+          configMap:
+            name: configs
+        - name: secret
+          secret:
+            secretName: keys	    
+      initContainers:
+      - name: init-permissions
+	image: dshiell15/cardano-node:1.26.2
+	command: ["/bin/sh", "-c"]
+	args: ["cp /secret/* /keys && chmod 0400 /keys/*"]
+	volumeMounts:
+	- name: secret
+	  mountPath: /secret
+	- name: keys
+	  mountPath: /keys
+      - name: pool-certificate
+        image: dshiell15/cardano-node:1.26.2
+        env:
+        - name: POOL_PLEDGE
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: pool_pledge
+        - name: POOL_COST
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: pool_cost
+        - name: POOL_MARGIN
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: pool_margin
+        - name: METADATA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: metadata_url
+        - name: METADATA_HASH
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: metadata_hash
+        - name: RELAY_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: relay_hostname
+        - name: RELAY_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: relay_port      
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+	command: ["cardano-cli", "stake-pool", "registration-certificate", "--cold-verification-key-file", "/keys/cold.vkey", "--vrf-verification-key-file", "/keys/vrf.vkey", "--pool-pledge", $(POOL_PLEDGE), "--pool-cost", $(POOL_COST), "--pool-margin", $(POOL_MARGIN), "--pool-reward-account-verification-key-file", "/keys/stake.vkey", "--pool-owner-stake-verification-key-file", "/keys/stake.vkey", "--single-host-pool-relay", $(RELAY_HOSTNAME), "--pool-relay-port", $(RELAY_PORT), "--metadata-url", $(METADATA_URL), "--metadata-hash", $(METADATA_HASH), "--out-file", '/keys/pool-registration.cert"]
+      containers:
+      - name: export-keys
+        image: alpine
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+        command: [/bin/sh, -c]
+        args:
+          - |
+            ls -l
+            echo "Ready for download"
+            echo "Sleeping to allow files to be exported with 'kubectl cp'"
+            trap 'exit 255' SIGTERM
+            sleep 10
+            echo "Exiting"
+  backoffLimit: 0
