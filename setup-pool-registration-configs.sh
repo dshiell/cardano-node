@@ -48,6 +48,21 @@ promptPoolParams() {
 	read -p "Relay port - Listening port for relay server(s): " REPLY
 	echo "${REPLY}" > ./configs/relay_port
     fi
+
+    if [ ! -r ./configs/utxo_tx_in ]; then
+	read -p "UTXO Tx In - UTXO hash for pool registration transaction: " REPLY
+	echo "${REPLY}" > ./configs/utxo_tx_in
+    fi
+
+    if [ ! -r ./configs/utxo_tx_ix ]; then
+	read -p "UTXO Tx Index - UTXO index for pool registration transaction: " REPLY
+	echo "${REPLY}" > ./configs/utxo_tx_ix
+    fi
+
+    if [ ! -r ./configs/utxo_tx_out ]; then
+	read -p "UTXO Tx Out - UTXO out for pool registration transaction: " REPLY
+	echo "${REPLY}" > ./configs/utxo_tx_out
+    fi
 }
 
 # setup configmap with required configs

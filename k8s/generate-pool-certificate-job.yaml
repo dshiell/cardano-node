@@ -14,23 +14,23 @@ spec:
       volumes:
         - name: keys
           emptyDir: {}
-            medium: Memory	   
+            medium: Memory         
         - name: config
           configMap:
             name: configs
         - name: secret
           secret:
-            secretName: keys	    
+            secretName: keys        
       initContainers:
       - name: init-permissions
-	image: dshiell15/cardano-node:1.26.2
-	command: ["/bin/sh", "-c"]
-	args: ["cp /secret/* /keys && chmod 0400 /keys/*"]
-	volumeMounts:
-	- name: secret
-	  mountPath: /secret
-	- name: keys
-	  mountPath: /keys
+        image: dshiell15/cardano-node:1.26.2
+        command: ["/bin/sh", "-c"]
+        args: ["cp /secret/* /keys && chmod 0400 /keys/*"]
+        volumeMounts:
+        - name: secret
+          mountPath: /secret
+        - name: keys
+          mountPath: /keys
       - name: pool-certificate
         image: dshiell15/cardano-node:1.26.2
         env:
@@ -73,7 +73,37 @@ spec:
           - name: keys
             mountPath: /keys
         workingDir: /keys
-	command: ["cardano-cli", "stake-pool", "registration-certificate", "--cold-verification-key-file", "/keys/cold.vkey", "--vrf-verification-key-file", "/keys/vrf.vkey", "--pool-pledge", $(POOL_PLEDGE), "--pool-cost", $(POOL_COST), "--pool-margin", $(POOL_MARGIN), "--pool-reward-account-verification-key-file", "/keys/stake.vkey", "--pool-owner-stake-verification-key-file", "/keys/stake.vkey", "--single-host-pool-relay", $(RELAY_HOSTNAME), "--pool-relay-port", $(RELAY_PORT), "--metadata-url", $(METADATA_URL), "--metadata-hash", $(METADATA_HASH), "--out-file", '/keys/pool-registration.cert"]
+        command: ["cardano-cli", "stake-pool", "registration-certificate", "--cold-verification-key-file", "/keys/cold.vkey", "--vrf-verification-key-file", "/keys/vrf.vkey", "--pool-pledge", $(POOL_PLEDGE), "--pool-cost", $(POOL_COST), "--pool-margin", $(POOL_MARGIN), "--pool-reward-account-verification-key-file", "/keys/stake.vkey", "--pool-owner-stake-verification-key-file", "/keys/stake.vkey", "--single-host-pool-relay", $(RELAY_HOSTNAME), "--pool-relay-port", $(RELAY_PORT), "--metadata-url", $(METADATA_URL), "--metadata-hash", $(METADATA_HASH), "--out-file", '/keys/pool-registration.cert"]
+      - name: delegation-certificate
+        image: dshiell15/cardano-node:1.26.2
+        command: ["cardano-cli", "stake-address", "delegation-certificate", "--stake-verification-key-file", "/keys/stake.vkey", "--cold-verification-key-file", "/keys/cold.vkey", "--out-file", "/keys/delegation.cert"]
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
+      - name: pool-registration-transaction-raw
+        image: dshiell15/cardano-node:1.26.2
+        env:
+        - name: UTXO_TX_IN
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: utxo_tx_in
+        - name: UTXO_TX_IDX
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: utxo_tx_idx
+        - name: UTXO_TX_OUT
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: utxo_tx_out
+        command: ["cardano-cli", "transaction", "build-raw", "--tx-in", "$(UTXO_TX_IN)#$(UTXO_TX_IDX)", "--tx-out", "$(UTXO_TX_OUT)+0", "--ttl", "0", "--fee", "0", "--out-file", "pool-registration-tx.raw", "--certificate-file", "/keys/pool-registration.cert", "--certificate-file", "/keys/delegation.cert"]
+        volumeMounts:
+          - name: keys
+            mountPath: /keys
+        workingDir: /keys
       containers:
       - name: export-keys
         image: alpine
