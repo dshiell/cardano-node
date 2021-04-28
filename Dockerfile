@@ -84,7 +84,8 @@ FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y \
     netbase \
-    jq
+    jq \
+    curl
 
 COPY --from=builder /usr/local/lib/libsodium.so.23 /lib/aarch64-linux-gnu/libsodium.so.23
 COPY --from=builder /lib/aarch64-linux-gnu/libnuma.so.1 /lib/aarch64-linux-gnu/libnuma.so.1

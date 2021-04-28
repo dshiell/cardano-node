@@ -32,6 +32,16 @@ promptPoolParams() {
 	echo "${REPLY}" > ./configs/pool_margin
     fi
 
+    if [ ! -r ./configs/pool_deposit_fee ]; then
+	read -p "Pool deposit fee - Cost to register a stake pool in lovelace (see protocol-parameters.json): " REPLY
+	echo "${REPLY}" > ./configs/pool_deposit_fee
+    fi
+
+    if [ ! -r ./configs/addr_balance ]; then
+	read -p "Pool deposit fee - Cost to register a stake pool in lovelace (see protocol-parameters.json): " REPLY
+	echo "${REPLY}" > ./configs/pool_deposit_fee
+    fi
+
     if [ ! -r ./configs/metadata_hash ]; then
 	read -p "Metadata URL - URL pointing to Pool metadata json: " REPLY
 	echo "${REPLY}" > ./configs/metadata_url
@@ -81,10 +91,39 @@ setupPoolRegistrationParameters() {
 	    --from-file=pool_pledge=./configs/pool_pledge \
 	    --from-file=pool_cost=./configs/pool_cost \
 	    --from-file=pool_margin=./configs/pool_margin \
+	    --from-file=pool_deposit_fee=./configs/pool_deposit_fee \
 	    --from-file=relay_port=./configs/relay_port \
 	    --from-file=metadata_url=./configs/metadata_url \
 	    --from-file=metadata_hash=./configs/metadata_hash \
-	    --from-file=relay_hostname=./configs/relay_hostname
+	    --from-file=relay_hostname=./configs/relay_hostname \
+	    --from-file=utxo_tx_in=./configs/utxo_tx_in \
+	    --from-file=utxo_tx_ix=./configs/utxo_tx_ix \
+	    --from-file=utxo_tx_out=./configs/utxo_tx_out \
+	    --from-file=create-cold-and-vrf-keys.sh=./scripts/create-cold-and-vrf-keys.sh \
+	    --from-file=create-operational-cert.sh=./script/create-operational-cert.sh
+	    
 }
 
+# setup configmap with required configs
+setupNodeConfigs() {
+
+    runCliCmd protocol-parameters --mainnet --out-file /dev/stdout > configs/protocol-parameters.json
+
+    set +e
+    kubectl -n cardano delete cm/configs
+    set -e
+    kubectl -n cardano create configmap configs \
+	--from-file=mainnet-topology.json=./configs/mainnet-topology.json \
+	--from-file=mainnet-relay-topology.json=./configs/mainnet-relay-topology.json \
+	--from-file=mainnet-config.json=./configs/mainnet-config.json \
+	--from-file=mainnet-byron-genesis.json=./configs/mainnet-byron-genesis.json \
+	--from-file=mainnet-shelley-genesis.json=./configs/mainnet-shelley-genesis.json \
+	--from-file=testnet-topology.json=./configs/testnet-topology.json \
+	--from-file=testnet-config.json=./configs/testnet-config.json \
+	--from-file=testnet-byron-genesis.json=./configs/testnet-byron-genesis.json \
+	--from-file=testnet-shelley-genesis.json=./configs/testnet-shelley-genesis.json \
+	--from-file=protocol-parameters.json=./configs/protocol-parameters.json
+}
+
+setupNodeConfigs
 setupPoolRegistrationParameters

@@ -13,7 +13,7 @@ spec:
       restartPolicy: Never
       volumes:
         - name: keys
-          emptyDir: {}
+          emptyDir:
             medium: Memory         
         - name: config
           configMap:
@@ -49,6 +49,16 @@ spec:
             configMapKeyRef:
               name: pool-configs
               key: pool_margin
+        - name: POOL_DEPOSIT_FEE
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: pool_deposit_fee
+        - name: ADDR_BALANCE
+          valueFrom:
+            configMapKeyRef:
+              name: pool-configs
+              key: addr_balance
         - name: METADATA_URL
           valueFrom:
             configMapKeyRef:
@@ -68,42 +78,37 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: pool-configs
-              key: relay_port      
-        volumeMounts:
-          - name: keys
-            mountPath: /keys
-        workingDir: /keys
-        command: ["cardano-cli", "stake-pool", "registration-certificate", "--cold-verification-key-file", "/keys/cold.vkey", "--vrf-verification-key-file", "/keys/vrf.vkey", "--pool-pledge", $(POOL_PLEDGE), "--pool-cost", $(POOL_COST), "--pool-margin", $(POOL_MARGIN), "--pool-reward-account-verification-key-file", "/keys/stake.vkey", "--pool-owner-stake-verification-key-file", "/keys/stake.vkey", "--single-host-pool-relay", $(RELAY_HOSTNAME), "--pool-relay-port", $(RELAY_PORT), "--metadata-url", $(METADATA_URL), "--metadata-hash", $(METADATA_HASH), "--out-file", '/keys/pool-registration.cert"]
-      - name: delegation-certificate
-        image: dshiell15/cardano-node:1.26.2
-        command: ["cardano-cli", "stake-address", "delegation-certificate", "--stake-verification-key-file", "/keys/stake.vkey", "--cold-verification-key-file", "/keys/cold.vkey", "--out-file", "/keys/delegation.cert"]
-        volumeMounts:
-          - name: keys
-            mountPath: /keys
-        workingDir: /keys
-      - name: pool-registration-transaction-raw
-        image: dshiell15/cardano-node:1.26.2
-        env:
+              key: relay_port
         - name: UTXO_TX_IN
           valueFrom:
             configMapKeyRef:
               name: pool-configs
               key: utxo_tx_in
-        - name: UTXO_TX_IDX
+        - name: UTXO_TX_IX
           valueFrom:
             configMapKeyRef:
               name: pool-configs
-              key: utxo_tx_idx
+              key: utxo_tx_ix
         - name: UTXO_TX_OUT
           valueFrom:
             configMapKeyRef:
               name: pool-configs
-              key: utxo_tx_out
-        command: ["cardano-cli", "transaction", "build-raw", "--tx-in", "$(UTXO_TX_IN)#$(UTXO_TX_IDX)", "--tx-out", "$(UTXO_TX_OUT)+0", "--ttl", "0", "--fee", "0", "--out-file", "pool-registration-tx.raw", "--certificate-file", "/keys/pool-registration.cert", "--certificate-file", "/keys/delegation.cert"]
+              key: utxo_tx_out	      
         volumeMounts:
           - name: keys
             mountPath: /keys
+          - name: config
+            mountPath: /configs
         workingDir: /keys
+	command: [/bin/sh, -c]
+	args:
+          - |
+	    cardano-cli stake-pool registration-certificate --cold-verification-key-file cold.vkey --vrf-verification-key-file vrf.vkey --pool-pledge $(POOL_PLEDGE) --pool-cose $(POOL_COST) --pool-margin $(POOL_MARGIN) --pool-reward-account-verification-key-file stake.vkey --pool-owner-stake-verification-key-file stake.vkey --single-host-pool-relay $(RELAY_HOSTNAME) --pool-relay-port $(RELAY_PORT) --metadata-url $(METADATA_URL) --metadata-hash $(METADATA_HASH) --out-file pool-registration.cert
+            cardano-cli stake-address delegation-certificate --stake-verification-key-file stake.vkey --cold-verification-key-file cold.vkey --out-file delegation.cert	    
+            cardano-cli transaction build-raw --tx-in $(UTXO_TX_IN)#$(UTXO_TX_IX) --tx-out $(UTXO_TX_OUT)+0 --ttl 0 --fee 0 --out-file pool-registration-tx.raw --certificate-file pool-registration.cert --certificate-file delegation.cert
+            min_fee=$(cardano-cli transaction calculate-min-free --tx-body-file pool-registration-tx.raw --tx-in-count 1 --tx-out-count 1 --witness-count 1 --protocol-params-file /configs/protocol-parameters.json) --mainnet
+            new_balance=$(expr $(POOL_BALANCE) - $(POOL_DEPOSIT_FEE) - ${min_fee})
+            cardano-cli transaction build-raw --tx-in $(UTXO_TX_IN)#$(UTXO_TX_IX) --tx-out "$(UTXO_TX_OUT)+${new_balance}" --ttl 200000 --fee ${min_fee} --out-file pool-registration-tx.raw --certificate-file pool-registration.cert --certificate-file delegation.cert
       containers:
       - name: export-keys
         image: alpine
