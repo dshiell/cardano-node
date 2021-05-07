@@ -85,10 +85,10 @@ FROM ubuntu:20.04
 RUN apt-get update && apt-get install -y \
     netbase \
     jq \
-    curl
+    curl \
+    libnuma1
 
 COPY --from=builder /usr/local/lib/libsodium.so.23 /lib/aarch64-linux-gnu/libsodium.so.23
-COPY --from=builder /lib/aarch64-linux-gnu/libnuma.so.1 /lib/aarch64-linux-gnu/libnuma.so.1
 COPY --from=builder /root/cardano-node /usr/local/bin/cardano-node
 COPY --from=builder /root/cardano-cli /usr/local/bin/cardano-cli
 
