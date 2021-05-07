@@ -1,0 +1,33 @@
+[Unit]
+Description=Cardano relay service.
+Wants=network-online.target
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cardano-node run --topology /home/cardano/configs/mainnet-relay-topology.json --database-path /data/db --socket-path /data/socket --host-addr 0.0.0.0 --port 3001 --config /home/cardano/configs/mainnet-config.json
+ExecStop=pkill --signal INT cardano-node
+User=cardano
+LimitNOFILE=1048576
+WorkingDirectory=/home/cardano
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=%n
+KillSignal=SIGINT
+SuccessExitStatus=143
+SyslogIdentifier=relay
+TimeoutStopSec=5
+KillMode=mixed
+
+# Hardening
+SystemCallArchitectures=native
+NoNewPrivileges=true
+PrivateTmp=true
+KeyringMode=private
+RestrictSUIDSGID=true
+RestrictRealtime=true
