@@ -1,1 +1,0 @@
-30 23 * * * /bin/systemctl try-restart relay.service 2>/dev/null

@@ -1,1 +1,6 @@
-30 * * * * /home/cardano/scripts/topologyUpdater.sh
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+CARDANO_NODE_SOCKET_PATH=/data/socket
+
+1 * * * * cardano /home/cardano/scripts/topologyUpdater.sh 1>/tmp/topology.log 2>&1
+30 23 * * * root /bin/systemctl try-restart relay.service 2>/dev/null
