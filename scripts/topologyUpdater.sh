@@ -2,22 +2,18 @@
 # adapted from: https://github.com/cardano-community/guild-operators/blob/alpha/scripts/cnode-helper-scripts/topologyUpdater.sh
 # This script should be run once an hour on your relay nodes.
 
-CNODE_HOSTNAME="${CNODE_HOSTNAME:='rpi-cardano-pool.dyndns.org}"
+CNODE_HOSTNAME="${CNODE_HOSTNAME:='ohana-pool.dyndns.org}"
 CNODE_PORT="${CNODE_PORT:=3001}"
 CNODE_VALENCY="${CNODE_VALENCY:=1}"
-GENESIS_JSON="${GENESIS_JSON:=/opt/cardano/configs/mainnet-shelley-genesis.json}"
-TOPOLOGY="${TOPOLOGY:=/opt/cardano/data/topology.json}"
+GENESIS_JSON="${GENESIS_JSON:=/home/cardano/configs/mainnet-shelley-genesis.json}"
+TOPOLOGY="${TOPOLOGY:=/home/cardano/topology.json}"
 MAX_PEERS="${MAX_PEERS:=20}"
-CUSTOM_PEERS="${CUSTOM_PEERS:=producer-0.cardano.svc.cluster.local:3001:1}"
+CUSTOM_PEERS="${CUSTOM_PEERS:=cardano-producer-1.local:6000:1}"
 NWMAGIC=$(jq -r .networkMagic < ${GENESIS_JSON})
-
-runCliCmd() {
-    kubectl -n cardano exec -t statefulset/relay -- /usr/local/bin/cardano-cli "$@"
-}
 
 node_alive_push() {
 
-    blockNo=$(runCliCmd query tip --mainnet | jq .block)
+    blockNo=$(cardano-cli query tip --mainnet | jq .block)
 
     echo "BlockNo: ${blockNo}"
     #local fail_cnt=0
